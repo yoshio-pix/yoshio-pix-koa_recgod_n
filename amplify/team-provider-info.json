@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-receptiontoataika-dev-95129-authRole",
+      "UnauthRoleArn": "arn:aws:iam::851725500264:role/amplify-receptiontoataika-dev-95129-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::851725500264:role/amplify-receptiontoataika-dev-95129-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-receptiontoataika-dev-95129-deployment",
+      "UnauthRoleName": "amplify-receptiontoataika-dev-95129-unauthRole",
+      "StackName": "amplify-receptiontoataika-dev-95129",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:851725500264:stack/amplify-receptiontoataika-dev-95129/293206b0-e266-11ee-b5cc-0a11713bea53",
+      "AmplifyAppId": "d3e1vdnzy1fzgd"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "800853962181",
+    "project_id": "koataika",
+    "storage_bucket": "koataika.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800853962181:android:f4c596a13333aae6ec2fac",
+        "android_client_info": {
+          "package_name": "com.koa_shrcep"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO6WzmFXsfSGaonYOSPtgW_lXdmZ0Fl5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
