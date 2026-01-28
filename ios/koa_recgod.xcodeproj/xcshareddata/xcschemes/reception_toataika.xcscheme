@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "koa_shrcep.app"
-               BlueprintName = "koa_shrcep"
-               ReferencedContainer = "container:koa_shrcep.xcodeproj">
+               BuildableName = "koa_recgod.app"
+               BlueprintName = "koa_recgod"
+               ReferencedContainer = "container:koa_recgod.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "koa_shrcepTests.xctest"
-               BlueprintName = "koa_shrcepTests"
-               ReferencedContainer = "container:koa_shrcep.xcodeproj">
+               BuildableName = "koa_recgodTests.xctest"
+               BlueprintName = "koa_recgodTests"
+               ReferencedContainer = "container:koa_recgod.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "koa_shrcep.app"
-            BlueprintName = "koa_shrcep"
-            ReferencedContainer = "container:koa_shrcep.xcodeproj">
+            BuildableName = "koa_recgod.app"
+            BlueprintName = "koa_recgod"
+            ReferencedContainer = "container:koa_recgod.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "koa_shrcep.app"
-            BlueprintName = "koa_shrcep"
-            ReferencedContainer = "container:koa_shrcep.xcodeproj">
+            BuildableName = "koa_recgod.app"
+            BlueprintName = "koa_recgod"
+            ReferencedContainer = "container:koa_recgod.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

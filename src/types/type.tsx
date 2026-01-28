@@ -10,7 +10,16 @@ export interface receptionRecordConst {
   driver: string;
   car: string;
   tel: string;
-  dest: string;
+  ordno: string;
+  record?: ReceptionDetail;
   loadstatus: string;
   receptstatus: string;
+}
+
+export interface ReceptionDetail {
+  date: string;
+  ordno: string;
+  product: string;
+  num: string;
+  biko: string;
 }

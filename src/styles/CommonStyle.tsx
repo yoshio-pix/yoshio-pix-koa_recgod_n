@@ -11,19 +11,19 @@ const windowHeight = Dimensions.get('window').height;
 export const styles = StyleSheet.create({
   //--------ヘッダ--------
   headerContainerR: {
-    backgroundColor: 'red', // ヘッダの背景色
+    backgroundColor: '#F6B1B1', // パステルレッド（やさしい赤）
     height: windowHeight * (1 / 13),
     justifyContent: 'center',
     zIndex: 10,
   },
   headerContainerL: {
-    backgroundColor: 'yellow', // ヘッダの背景色
+    backgroundColor: '#FFF0A5', // パステルイエロー（淡い黄色）
     height: windowHeight * (1 / 13),
     justifyContent: 'center',
     zIndex: 10,
   },
   headerContainerK: {
-    backgroundColor: '#538DD5', // ヘッダの背景色
+    backgroundColor: '#B7D4F0', // パステルブルー（淡い青）
     height: windowHeight * (1 / 13),
     justifyContent: 'center',
     zIndex: 10,
@@ -83,7 +83,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'ipaexg',
   },
   logo: {
-    width: windowWidth * (1 / 2),
+    width: windowWidth * (1 / 2.5),
     resizeMode: 'contain',
   },
   logoMarginRVW: {
@@ -92,7 +92,7 @@ export const styles = StyleSheet.create({
   },
   logoMarginLVW: {
     marginTop: -80,
-    marginBottom: 50,
+    marginBottom: 0,
     resizeMode: 'contain',
   },
   bottomSection: {
@@ -475,6 +475,12 @@ export const styles = StyleSheet.create({
 
     // テキストスタイリング
   },
+  cellColumn: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4, // RN 0.71+ ならOK
+  },
   row: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -558,5 +564,62 @@ export const styles = StyleSheet.create({
   pickerText: {
     marginTop: -15,
   },
+  detailButtonOrd: {
+    margin: windowHeight * (1 / 40),
+    height: windowHeight * (1 / 15),
+    width: windowWidth * (1 / 4),
+    borderRadius: 6,
+    justifyContent: 'center', // 子要素を垂直方向に中央揃え
+    alignItems: 'center', // 子要素を水平方向に中央揃え
+    backgroundColor: '#d9d9d9',
+    padding: 5,
+    flex: 1,
+  },
+  detailButtonTextOrd: {
+    color: 'black',
+    fontSize: 20,
+  },
+  /* ================================
+   * 明細テーブル（商品・数量・備考）
+   * ================================ */
+  detailTableOrd: {
+    width: '95%', // ← 重要：横幅を確保
+    alignSelf: 'center', // ← 中央寄せ
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#444',
+    backgroundColor: '#fff',
+  },
+
+  tableRowOrd: {
+    flexDirection: 'row',
+  },
+
+  /* ヘッダ */
+  headerCellOrd: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    fontSize: 15,
+    fontWeight: 'bold',
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#444',
+    backgroundColor: '#f0f0f0',
+    textAlign: 'center',
+    flex: 3, // 仮（後で上書き）
+  },
+
+  /* 明細セル */
+  bodyCellOrd: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    fontSize: 15,
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#444',
+    textAlign: 'left',
+    flex: 3, // 仮
+  },
+
   //--------------------
 });

@@ -16,11 +16,17 @@ import {tableDataState} from '../atom/atom.tsx';
 import {useRecoilState} from 'recoil';
 import PopupDetail from '../components/PopupDetail.tsx';
 import {receptionRecordConst} from '../types/type.tsx';
+import axios from 'axios';
 // RVW002 用の navigation 型
 type NavigationProp = StackNavigationProp<RootList, 'RVW002'>;
 interface Props {
   navigation: NavigationProp;
 }
+const apiKey = 'AIzaSyB89faAwz8_2Y1LdNK9QLD0fk3Loa1Rgxw';
+const sheetId = '1HfqNBnhfh8vYZnBXWwxKwqLqLGoaVS2MZy8h30yDPI4';
+const sheetName = 'sheet1';
+const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?valueRenderOption=FORMATTED_VALUE&key=${apiKey}`;
+
 const RVW002 = ({navigation}: Props) => {
   const [isBtnEnabledBck, toggleButtonBck] = useButton(); //ボタン制御
   const [isBtnEnabledUpd, toggleButtonUpd] = useButton(); //ボタン制御
@@ -65,16 +71,17 @@ const RVW002 = ({navigation}: Props) => {
       try {
         // API GatewayのエンドポイントURL
         const apiEndpointDB =
-          'https://arc32werp4.execute-api.ap-northeast-1.amazonaws.com/stage/selectReception3';
+          'https://afodl4wvs9.execute-api.ap-northeast-3.amazonaws.com/stage/selectReceptionRg1';
         let now = new Date();
         // const japanTimeOffset = 9 * 60 * 60 * 1000; // 9時間 * 60分
         const japanTime = new Date(now.getTime()); // + japanTimeOffset);
+
         now = japanTime;
         const year = now.getFullYear();
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         const day = now.getDate().toString().padStart(2, '0');
         const dataToSendDB = {createDate: `${year}${month}${day}`};
-
+        console.log(dataToSendDB);
         const responseDB = await fetch(apiEndpointDB, {
           method: 'POST', // HTTPメソッド
           headers: {'Content-Type': 'application/json'},
@@ -91,7 +98,7 @@ const RVW002 = ({navigation}: Props) => {
 
         // データ変換処理
         let tmpTableData = responseData.data
-          // .filter((item: {kyoten: string}) => item.kyoten === '本社')
+          // .filter((item: {kyoten: string}) => item.kyoten === '保税')
           .slice() // 元の配列を変更しないためにコピーを作成
           .reverse() // 配列の順番を逆にする
           .map(
@@ -103,7 +110,7 @@ const RVW002 = ({navigation}: Props) => {
                 driver: string;
                 car: string;
                 tel: string;
-                dest: string;
+                ordno: string;
                 proc: string;
                 tsuchi_1: string;
                 receptstatus_1: string;
@@ -114,6 +121,12 @@ const RVW002 = ({navigation}: Props) => {
                 tsuchi_3: string;
                 receptstatus_3: string;
                 loadstatus_3: string;
+                tsuchi_4: string;
+                receptstatus_4: string;
+                loadstatus_4: string;
+                tsuchi_5: string;
+                receptstatus_5: string;
+                loadstatus_5: string;
                 // time_id: number;
               },
               index: number,
@@ -125,17 +138,23 @@ const RVW002 = ({navigation}: Props) => {
               item.driver, // 名前    3
               item.car, // 車両番号   4
               item.tel, // 電話番号   5
-              item.dest, // 行き先    6
+              item.ordno, // 手配番号・発注番号    6
               item.proc, // 処理状態  7
               item.tsuchi_1, // 通知    8
               item.receptstatus_1, // 応対状態 9
-              item.loadstatus_1, // 積込 10
+              item.loadstatus_1, // 荷下 10
               item.tsuchi_2, // 通知    11
               item.receptstatus_2, // 応対状態 12
-              item.loadstatus_2, // 積込 13
+              item.loadstatus_2, // 荷下 13
               item.tsuchi_3, // 通知    14
               item.receptstatus_3, // 応対状態 15
-              item.loadstatus_3, // 積込 16
+              item.loadstatus_3, // 荷下 16
+              item.tsuchi_4, // 通知    17
+              item.receptstatus_4, // 応対状態 18
+              item.loadstatus_4, // 荷下 19
+              item.tsuchi_5, // 通知    20
+              item.receptstatus_5, // 応対状態 21
+              item.loadstatus_5, // 荷下 22
               // item.time_id,
               // item.create_dt,
             ],
@@ -153,7 +172,34 @@ const RVW002 = ({navigation}: Props) => {
     fetchData();
     return;
   };
+  /************************************************
+   * 明細（商品・数量・備考）テーブル
+   ************************************************/
+  const renderDetailItems = (record: any) => {
+    const products = record.product.split(',').map((v: string) => v.trim());
+    const nums = record.num.split(',').map((v: string) => v.trim());
+    const bikos = record.biko.split(',').map((v: string) => v.trim());
 
+    return (
+      <View style={styles.detailTableOrd}>
+        {/* ヘッダ */}
+        <View style={styles.tableRowOrd}>
+          <Text style={styles.headerCellOrd}>商品名</Text>
+          <Text style={styles.headerCellOrd}>数量</Text>
+          <Text style={styles.headerCellOrd}>備考</Text>
+        </View>
+
+        {/* 明細行 */}
+        {products.map((product: string, index: number) => (
+          <View key={index} style={styles.tableRowOrd}>
+            <Text style={styles.bodyCellOrd}>{product}</Text>
+            <Text style={styles.bodyCellOrd}>{nums[index] ?? ''}</Text>
+            <Text style={styles.bodyCellOrd}>{bikos[index] ?? ''}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
   /************************************************
    * 詳細データをレンダリングするための関数
    ************************************************/
@@ -202,12 +248,14 @@ const RVW002 = ({navigation}: Props) => {
         </View>
         <View style={styles.tableRow}>
           <View style={styles.tableCell}>
-            <Text style={styles.labelText}>行先：</Text>
+            <Text style={styles.labelText}>手配発注番号：</Text>
           </View>
           <View style={styles.tableCell}>
-            <Text style={styles.labelText}>{data.dest}</Text>
+            <Text style={styles.labelText}>{data.ordno}</Text>
           </View>
         </View>
+        {/* 明細テーブル */}
+        {data.ordno && renderDetailItems(data.record)}
       </View>
     );
   };
@@ -215,21 +263,52 @@ const RVW002 = ({navigation}: Props) => {
   /************************************************
    * 詳細ボタン
    ************************************************/
-  const handleDetailButton = (rowData: any) => {
-    const dataToSet = {
-      create_dt: rowData[1],
-      company: rowData[2],
-      driver: rowData[3],
-      car: rowData[4],
-      tel: rowData[5],
-      dest: rowData[6],
-      time_id: '',
-      create_time: '',
-      loadstatus: '',
-      receptstatus: '',
-    };
-    setSelectData(dataToSet);
-    setPopupVisible(true);
+  const handleDetailButton = async (rowData: any) => {
+    try {
+      const response = await axios.get(dataUrl);
+      if (!response?.data?.values) {
+        console.log('No response data available');
+        return;
+      }
+
+      const values = response.data.values as string[][];
+
+      // 手配番号一致の行を1件取得
+      const row = values.find((r: any[]) => rowData[6] === r[1]);
+      if (!row) {
+        console.log('該当データなし');
+        return;
+      }
+
+      // record を確定させる
+      const record = {
+        date: row[0] ?? '',
+        ordno: row[1] ?? '',
+        product: row[2] ?? '',
+        num: row[3] ?? '',
+        biko: row[4] ?? '',
+      };
+
+      // record が「入った後」で dataToSet を作る
+      const dataToSet: receptionRecordConst = {
+        create_dt: rowData[1],
+        company: rowData[2],
+        driver: rowData[3],
+        car: rowData[4],
+        tel: rowData[5],
+        ordno: rowData[6],
+        record,
+        time_id: '',
+        create_time: '',
+        loadstatus: '',
+        receptstatus: '',
+      };
+
+      setSelectData(dataToSet);
+      setPopupVisible(true);
+    } catch (e) {
+      console.log('fetch data error', e);
+    }
   };
 
   return (
@@ -252,7 +331,7 @@ const RVW002 = ({navigation}: Props) => {
           <Text style={styles.headerText}>車両番号</Text>
         </View>
         <View style={[styles.cell2, styles.headerCell]}>
-          <Text style={styles.headerText}>行き先</Text>
+          <Text style={styles.headerText}>手配発注番号</Text>
         </View>
         <View style={[styles.cell2, styles.headerCell]}>
           <Text style={styles.headerText}>詳細</Text>
@@ -261,7 +340,7 @@ const RVW002 = ({navigation}: Props) => {
           <Text style={styles.headerText}>対応</Text>
         </View>
         <View style={[styles.cell3, styles.headerCell]}>
-          <Text style={styles.headerText}>積込</Text>
+          <Text style={styles.headerText}>荷下</Text>
         </View>
       </View>
 
@@ -284,7 +363,7 @@ const RVW002 = ({navigation}: Props) => {
             <View key={4} style={styles.cell2}>
               <Text>{rowData[4]}</Text>
             </View>
-            {/* 行先 */}
+            {/* 手配番号・発注番号 */}
             <View key={6} style={styles.cell2}>
               <Text>{rowData[6]}</Text>
             </View>
@@ -297,112 +376,188 @@ const RVW002 = ({navigation}: Props) => {
               </TouchableOpacity>
             </View>
             {/* 対応 */}
-            <View key={'recept'} style={[styles.cell3, styles.row]}>
-              {rowData[8] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[9] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+            <View key={'recept'} style={[styles.cell3, styles.cellColumn]}>
+              <View style={styles.row}>
+                {rowData[8] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[9] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[9] === '1' ? styles.disabledButton : null,
                     ]}>
-                    本
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {rowData[11] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[12] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+                    <Text
+                      style={[
+                        rowData[9] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      運
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[11] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[12] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[12] === '1' ? styles.disabledButton : null,
                     ]}>
-                    岡
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {rowData[14] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[15] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+                    <Text
+                      style={[
+                        rowData[12] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      保
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={styles.row}>
+                {rowData[14] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[15] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[15] === '1' ? styles.disabledButton : null,
                     ]}>
-                    大
-                  </Text>
-                </TouchableOpacity>
-              )}
+                    <Text
+                      style={[
+                        rowData[15] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      二
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[17] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
+                    style={[
+                      styles.buttonSmall3,
+                      rowData[18] === '1' ? styles.disabledButton : null,
+                    ]}>
+                    <Text
+                      style={[
+                        rowData[18] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      本
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[20] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
+                    style={[
+                      styles.buttonSmall3,
+                      rowData[21] === '1' ? styles.disabledButton : null,
+                    ]}>
+                    <Text
+                      style={[
+                        rowData[21] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      明
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-            {/* 積込 */}
-            <View key={'load'} style={[styles.cell3, styles.row]}>
-              {rowData[8] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[10] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+            {/* 荷下 */}
+            <View key={'load'} style={[styles.cell3, styles.cellColumn]}>
+              <View style={styles.row}>
+                {rowData[8] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[10] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[10] === '1' ? styles.disabledButton : null,
                     ]}>
-                    本
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {rowData[11] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[13] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+                    <Text
+                      style={[
+                        rowData[10] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      運
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[11] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[13] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[13] === '1' ? styles.disabledButton : null,
                     ]}>
-                    岡
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {rowData[14] === '1' && (
-                <TouchableOpacity
-                  disabled={true}
-                  style={[
-                    styles.buttonSmall3,
-                    rowData[16] === '1' ? styles.disabledButton : null,
-                  ]}>
-                  <Text
+                    <Text
+                      style={[
+                        rowData[13] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      保
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={styles.row}>
+                {rowData[14] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
                     style={[
-                      rowData[16] === '1'
-                        ? styles.disabledButton
-                        : styles.textWhite,
+                      styles.buttonSmall3,
+                      rowData[16] === '1' ? styles.disabledButton : null,
                     ]}>
-                    大
-                  </Text>
-                </TouchableOpacity>
-              )}
+                    <Text
+                      style={[
+                        rowData[16] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      二
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[17] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
+                    style={[
+                      styles.buttonSmall3,
+                      rowData[19] === '1' ? styles.disabledButton : null,
+                    ]}>
+                    <Text
+                      style={[
+                        rowData[19] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      本
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {rowData[20] === '1' && (
+                  <TouchableOpacity
+                    disabled={true}
+                    style={[
+                      styles.buttonSmall3,
+                      rowData[22] === '1' ? styles.disabledButton : null,
+                    ]}>
+                    <Text
+                      style={[
+                        rowData[22] === '1'
+                          ? styles.disabledButton
+                          : styles.textWhite,
+                      ]}>
+                      明
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         ))}

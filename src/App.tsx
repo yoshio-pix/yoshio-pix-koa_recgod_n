@@ -12,11 +12,13 @@ const sendTokenToServer = async (token: string) => {
     uniqueId = await DeviceInfo.getUniqueId();
     console.log(uniqueId);
     const response = await axios.post(
-      // 'https://n95lmcgaz7.execute-api.ap-northeast-1.amazonaws.com/stage/createPushToken3', //本部
-      'https://n95lmcgaz7.execute-api.ap-northeast-1.amazonaws.com/stage/createPushToken3_1', //保税
-      // 'https://n95lmcgaz7.execute-api.ap-northeast-1.amazonaws.com/stage/createPushToken3_2', //岡セラ
-      // 'https://n95lmcgaz7.execute-api.ap-northeast-1.amazonaws.com/stage/createPushToken3_3', //大ヶ池
-      // 'https://n95lmcgaz7.execute-api.ap-northeast-1.amazonaws.com/stage/createPushToken3_4', //運輸
+      //  'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1', //本部
+
+      // 'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1_1', //運輸
+      // 'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1_2', //保税
+      // 'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1_3', //第二
+      // 'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1_4', //岡本
+      'https://i4ez70cwt2.execute-api.ap-northeast-3.amazonaws.com/stage/createPushTokenRg1_5', //岡明
       {
         token: token,
         userId: uniqueId,

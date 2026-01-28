@@ -14,7 +14,7 @@ export const objState = atom<receptionRecordConst>({
     driver: '',
     car: '',
     tel: '',
-    dest: '',
+    ordno: '',
     loadstatus: '',
     receptstatus: '',
   },
@@ -35,8 +35,8 @@ export const companyState = atom<string>({
   default: '',
 });
 
-export const destState = atom<string>({
-  key: 'destState',
+export const ordnoState = atom<string>({
+  key: 'ordnoState',
   default: '',
 });
 
@@ -100,7 +100,7 @@ export const kvw001dataState = atom<receptionRecordConst>({
     driver: '',
     car: '',
     tel: '',
-    dest: '',
+    ordno: '',
     loadstatus: '',
     receptstatus: '',
   },

@@ -1,4 +1,4 @@
-package com.koa_shrcep
+package com.koa_recgod
 
 import android.app.Application
 import com.facebook.react.PackageList

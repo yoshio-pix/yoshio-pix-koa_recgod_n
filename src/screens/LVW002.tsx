@@ -5,7 +5,7 @@
 import Header from '../components/Header'; // Headerコンポーネントのインポート
 import Footer from '../components/Footer'; // Footerコンポーネントのインポート
 import {styles} from '../styles/CommonStyle'; // 共通スタイル
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -27,15 +27,25 @@ import {
   tableDataState,
   addUrlState,
   kyotenState,
+  ordnoState,
 } from '../atom/atom.tsx';
 import {useRecoilValue, useSetRecoilState} from 'recoil';
 import {useAlert} from '../components/AlertContext.tsx';
 import messages from '../utils/messages.tsx';
+import axios from 'axios';
+import {receptionRecordConst} from '../types/type.tsx';
+import PopupDetail from '../components/PopupDetail.tsx';
+
 // LVW002 用の navigation 型
 type NavigationProp = StackNavigationProp<RootList, 'LVW002'>;
 interface Props {
   navigation: NavigationProp;
 }
+const apiKey = 'AIzaSyB89faAwz8_2Y1LdNK9QLD0fk3Loa1Rgxw';
+const sheetId = '1HfqNBnhfh8vYZnBXWwxKwqLqLGoaVS2MZy8h30yDPI4';
+const sheetName = 'sheet1';
+const dataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?valueRenderOption=FORMATTED_VALUE&key=${apiKey}`;
+
 const LVW002 = ({navigation}: Props) => {
   const [isBtnEnabledBck, toggleButtonBck] = useButton(); //ボタン制御
   const [isBtnEnabledSnd, toggleButtonSnd] = useButton(); //ボタン制御
@@ -45,7 +55,13 @@ const LVW002 = ({navigation}: Props) => {
   const obj = useRecoilValue(objState); //Recoil id
   const kyoten = useRecoilValue(kyotenState); //Recoil
   const addUrl = useRecoilValue(addUrlState); //Recoil
+  const ordno = useRecoilValue(ordnoState); //Recoil
   const setTableData = useSetRecoilState(tableDataState); //Recoil id
+  const [popupVisible, setPopupVisible] = useState<boolean>(false); // 詳細ポップアップ
+  const [selectData, setSelectData] = useState<receptionRecordConst | null>(
+    null,
+  ); // 詳細ポップアップ表示する旧タグ情報
+
   const {showAlert} = useAlert();
   // useEffect フックを使用してステートが変更されるたびにチェック
   useEffect(() => {}, []);
@@ -73,7 +89,7 @@ const LVW002 = ({navigation}: Props) => {
       //---------承諾後 対応ステータス更新処理---------
       // API GatewayのエンドポイントURL
       const apiEndpoint =
-        'https://5mafa3mbr9.execute-api.ap-northeast-1.amazonaws.com/stage/updateReception3' +
+        'https://vm5ru08509.execute-api.ap-northeast-3.amazonaws.com/stage/updateReceptionRg1' +
         addUrl;
 
       // 送信するデータ
@@ -111,7 +127,7 @@ const LVW002 = ({navigation}: Props) => {
       try {
         // API GatewayのエンドポイントURL
         const apiEndpointDB =
-          'https://arc32werp4.execute-api.ap-northeast-1.amazonaws.com/stage/selectReception3';
+          'https://afodl4wvs9.execute-api.ap-northeast-3.amazonaws.com/stage/selectReceptionRg1';
         let now = new Date();
         // const japanTimeOffset = 9 * 60 * 60 * 1000; // 9時間 * 60分
         const japanTime = new Date(now.getTime()); //+ japanTimeOffset);
@@ -148,7 +164,7 @@ const LVW002 = ({navigation}: Props) => {
                 driver: string;
                 car: string;
                 tel: string;
-                dest: string;
+                ordno: string;
                 proc: string;
                 tsuchi_1: string;
                 receptstatus_1: string;
@@ -162,6 +178,9 @@ const LVW002 = ({navigation}: Props) => {
                 tsuchi_4: string;
                 receptstatus_4: string;
                 loadstatus_4: string;
+                tsuchi_5: string;
+                receptstatus_5: string;
+                loadstatus_5: string;
                 time_id: number;
               },
               index: number,
@@ -173,20 +192,23 @@ const LVW002 = ({navigation}: Props) => {
               item.driver, // 名前    3
               item.car, // 車両番号   4
               item.tel, // 電話番号   5
-              item.dest, // 行き先    6
+              item.ordno, // 手配番号・発注番号    6
               item.proc, // 処理状態  7
               item.tsuchi_1, // 通知    8
               item.receptstatus_1, // 応対状態 9
-              item.loadstatus_1, // 積込 10
+              item.loadstatus_1, // 荷下 10
               item.tsuchi_2, // 通知    11
               item.receptstatus_2, // 応対状態 12
-              item.loadstatus_2, // 積込 13
+              item.loadstatus_2, // 荷下 13
               item.tsuchi_3, // 通知    14
               item.receptstatus_3, // 応対状態 15
-              item.loadstatus_3, // 積込 16
+              item.loadstatus_3, // 荷下 16
               item.tsuchi_4, // 通知    17
               item.receptstatus_4, // 応対状態 18
-              item.loadstatus_4, // 積込 19
+              item.loadstatus_4, // 荷下 19
+              item.tsuchi_5, // 通知    20
+              item.receptstatus_5, // 応対状態 21
+              item.loadstatus_5, // 荷下 22
               item.time_id,
               item.create_dt,
             ],
@@ -223,6 +245,99 @@ const LVW002 = ({navigation}: Props) => {
     navigation.navigate('LVW001');
     // navigation.navigate('KVW001');//★
     return;
+  };
+
+  /************************************************
+   * 詳細データをレンダリングするための関数
+   ************************************************/
+  const renderDetailData = (data: receptionRecordConst) => {
+    const record = data.record;
+    if (!record) {
+      return null;
+    }
+    const products = record.product.split(',').map(v => v.trim());
+    const nums = record.num.split(',').map(v => v.trim());
+    const bikos = record.biko.split(',').map(v => v.trim());
+    return (
+      <View style={styles.tableMain}>
+        <View style={styles.tableRow}>
+          <View style={styles.tableCell}>
+            <Text style={styles.labelText}>手配発注番号：</Text>
+          </View>
+          <View style={styles.tableCell}>
+            <Text style={styles.labelText}>{data.ordno}</Text>
+          </View>
+        </View>
+        <View style={styles.detailTableOrd}>
+          {/* ヘッダ */}
+          <View style={styles.tableRowOrd}>
+            <Text style={styles.headerCellOrd}>商品名</Text>
+            <Text style={styles.headerCellOrd}>数量</Text>
+            <Text style={styles.headerCellOrd}>備考</Text>
+          </View>
+
+          {/* 明細行 */}
+          {products.map((product: string, index: number) => (
+            <View key={index} style={styles.tableRowOrd}>
+              <Text style={styles.bodyCellOrd}>{product}</Text>
+              <Text style={styles.bodyCellOrd}>{nums[index] ?? ''}</Text>
+              <Text style={styles.bodyCellOrd}>{bikos[index] ?? ''}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  /************************************************
+   * 詳細ボタン
+   ************************************************/
+  const handleDetailButton = async (orderno: string) => {
+    try {
+      const response = await axios.get(dataUrl);
+      if (!response?.data?.values) {
+        console.log('No response data available');
+        return;
+      }
+
+      const values = response.data.values as string[][];
+
+      // 手配番号一致の行を1件取得
+      const row = values.find((r: any[]) => orderno === r[1]);
+      if (!row) {
+        console.log('該当データなし');
+        return;
+      }
+
+      // record を確定させる
+      const record = {
+        date: row[0] ?? '',
+        ordno: row[1] ?? '',
+        product: row[2] ?? '',
+        num: row[3] ?? '',
+        biko: row[4] ?? '',
+      };
+
+      // record が「入った後」で dataToSet を作る
+      const dataToSet: receptionRecordConst = {
+        create_dt: '',
+        company: '',
+        driver: '',
+        car: '',
+        tel: '',
+        ordno: ordno,
+        record,
+        time_id: '',
+        create_time: '',
+        loadstatus: '',
+        receptstatus: '',
+      };
+
+      setSelectData(dataToSet);
+      setPopupVisible(true);
+    } catch (e) {
+      console.log('fetch data error', e);
+    }
   };
 
   return (
@@ -271,6 +386,23 @@ const LVW002 = ({navigation}: Props) => {
                   <Text style={[styles.labelText]}>{car}</Text>
                 </View>
               </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell2}>
+                  <Text style={[styles.labelText, styles.alignRight]}>
+                    手配発注番号：
+                  </Text>
+                </View>
+                <View style={styles.tableCell3}>
+                  <TouchableOpacity
+                    style={[styles.detailButtonOrd]}
+                    onPress={() => handleDetailButton(ordno)}>
+                    <Text style={[styles.detailButtonTextOrd]}>
+                      {ordno}
+                      {' (詳細)'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
             <Text style={styles.labelText}>来社されました。</Text>
           </View>
@@ -301,6 +433,14 @@ const LVW002 = ({navigation}: Props) => {
 
         {/* フッタ */}
         <Footer />
+
+        {/* 詳細ポップアップ */}
+        <PopupDetail
+          isVisible={popupVisible}
+          onClose={() => setPopupVisible(false)}>
+          {/* 選択された oldTagInfo の詳細データをレンダリング */}
+          {selectData && renderDetailData(selectData)}
+        </PopupDetail>
       </ScrollView>
     </KeyboardAvoidingView>
   );
